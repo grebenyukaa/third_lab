@@ -5,6 +5,7 @@ from common import *
 from flask import *
 
 import requests as pyrequests
+import json as pyjson
 
 app = Flask(__name__)
 app.config.update(dict(\
@@ -77,7 +78,9 @@ def logic_posts_post():
             cap = get_url_parameter('caption')
             return from_pyresponce(pyrequests.post(\
                 api_func(settings.backends['posts'], 'posts'),\
-                params = {'user_id': uid, 'text': text, 'caption': cap}\
+                params = {'user_id': uid},\
+                data = pyjson.dumps({'text': text, 'caption': cap}),\
+                headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}\
             ))
         else:
             return api_406('Required parameters: text, caption')
@@ -101,7 +104,8 @@ def logic_post(post_id):
                             cap = get_url_parameter('caption')
                             return from_pyresponce(pyrequests.put(\
                                 api_func(settings.backends['posts'], 'posts/{0}'.format(post_id)),\
-                                params = {'text': text, 'caption': cap}\
+                                data = pyjson.dumps({'text': text, 'caption': cap}),\
+                                headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}\
                             ))
                         else:
                             return api_406('Required parameters: text, caption')
@@ -150,7 +154,9 @@ def logic_comments_post():
             text = get_url_parameter('text')
             return from_pyresponce(pyrequests.post(\
                 api_func(settings.backends['comments'], 'comments'),\
-                params = {'user_id': uid, 'post_id': pid, 'text': text}\
+                params = {'user_id': uid, 'post_id': pid},\
+                data = pyjson.dumps({'text': text}),\
+                headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}\
             ))
         else:
             return api_406('Required parameters: text, post_id')
@@ -173,7 +179,8 @@ def logic_comment(comment_id):
                             text = get_url_parameter('text')
                             return from_pyresponce(pyrequests.put(\
                                 api_func(settings.backends['comments'], 'comments/{0}'.format(comment_id)),\
-                                params = {'text': text}\
+                                data = pyjson.dumps({'text': text}),\
+                                headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}\
                             ))
                         else:
                             return api_406('Required parameters: text')

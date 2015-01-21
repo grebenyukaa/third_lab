@@ -5,6 +5,7 @@ from common import *
 from flask import *
 
 import requests as pyrequests
+import json as pyjson
 import hashlib
 
 app = Flask(__name__)
@@ -101,7 +102,9 @@ def post_posts():
             if cap:
                 postidr = pyrequests.post(\
                     api_func(settings.backends['logic'], 'logic/posts'),\
-                    params = {'user_id': userr.json()['id'], 'session_id': sid, 'text': text, 'caption': cap}\
+                    params = {'user_id': userr.json()['id'], 'session_id': sid},\
+                    data = pyjson.dumps({'text': text, 'caption': cap}),\
+                    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}\
                 )
                 return redirect(url_for('root'))
             else:
@@ -146,7 +149,9 @@ def put_post(post_id):
                     text = get_url_parameter('text')
                     postidr = pyrequests.put(\
                         api_func(settings.backends['logic'], 'logic/posts/{0}'.format(post_id)),\
-                        params = {'user_id': user['id'], 'session_id': sid, 'text': text, 'caption': cap}\
+                        params = {'user_id': user['id'], 'session_id': sid},\
+                        data = pyjson.dumps({'text': text, 'caption': cap}),\
+                        headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}\
                     )
                     if postidr.status_code == 200:
                         return redirect(url_for('root'))
@@ -204,7 +209,9 @@ def post_comments():
                 if text:
                     commentidr = pyrequests.post(\
                         api_func(settings.backends['logic'], 'logic/comments'),\
-                        params = {'user_id': user['id'], 'post_id': pid, 'session_id': sid, 'text': text}\
+                        params = {'user_id': user['id'], 'post_id': pid, 'session_id': sid},\
+                        data = pyjson.dumps({'text': text}),\
+                        headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}\
                     )
                     return redirect(url_for('get_post', post_id = pid))
                 else:
@@ -235,7 +242,9 @@ def put_comment(comment_id):
                     text = get_url_parameter('text')
                     comidr = pyrequests.put(\
                         api_func(settings.backends['logic'], 'logic/comments/{0}'.format(comment_id)),\
-                        params = {'user_id': user['id'], 'session_id': sid, 'text': text}\
+                        params = {'user_id': user['id'], 'session_id': sid},\
+                        data = pyjson.dumps({'text': text}),\
+                        headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}\
                     )
                     if comidr.status_code == 200:
                         return redirect(url_for('get_post', post_id = post_id))

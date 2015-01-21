@@ -22,7 +22,7 @@ def get_url_parameter(name, request = request):
 def has_url_parameter(name):
     rjson = request.get_json()
     part = (name in request.args) or (name in request.form) or (name in request.headers)
-    return ((name in rjson) and part) if rjson else part
+    return ((name in rjson) or part) if rjson else part
 
 def api_func(addr, f):
     return '/'.join([addr, f]) 
