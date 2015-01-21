@@ -1,0 +1,8 @@
+{% extends "layout.html" %}
+{% block body %}
+  <form action="{{ url_for('logout') }}" method=post>
+    <dl>
+      <dd><input type=submit value=Logout>
+    </dl>
+  </form>
+{% endblock %}

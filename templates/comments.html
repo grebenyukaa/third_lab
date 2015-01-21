@@ -1,0 +1,15 @@
+<br/>
+{% for comment in comments %}
+<a href="/comments/{{comment.id}}">{{comment.text}}</a>
+{% endfor %}
+<form action="{{ url_for('root') }}" method=post>
+  <dl>
+    <dt>Limit
+    <dd><input type=text value=limit>
+    <dt>Offset
+    <dd><input type=text value=offset>
+    <dt>Comments per page
+    <dd><input type=text value=res_per_page>
+    <dd><input type=submit value=Show>
+  </dl>
+</form>

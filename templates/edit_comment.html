@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block body %}
+  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+  <form action="{{ url_for('put_comment', comment_id = comment_id) }}" method=post>
+    <dl>
+      <dt>Text:
+      <dd><textarea name=text rows=40 cols=100>{{text}}</textarea>
+      <dd><input type=submit value=Done>
+      <dd><input type=hidden name=editing_finished value="True">
+      <dd><input type=hidden name=post_id value={{post_id}}>
+    </dl>
+  </form>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h2>Edit post</h2>
+  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+  <form action="{{ url_for('put_post', post_id = post_id) }}" method=post>
+    <dl>
+      <dt>Caption:
+      <dd><input type=text name=caption value="{{caption}}">
+      <dt>Text:
+      <dd><textarea name=text rows=40 cols=100>{{text}}</textarea>
+      <dd><input type=hidden name=editing_finished value="True">
+      <dd><input type=submit value=Done>
+    </dl>
+  </form>
+{% endblock %}
