@@ -13,30 +13,39 @@ app.config.update(dict(\
 @app.route('/comments', methods=['GET'])
 def get_comments():
     pid = get_url_parameter('post_id')
+    pids = get_url_parameter('post_ids')
     rpp = get_url_parameter('res_per_page')
     cnt = get_url_parameter('limit')
     offset = get_url_parameter('offset')
-    cs = None
+    csq = None
+    
     if has_url_parameter('user_id'):        
         uid = get_url_parameter('user_id')
-        if offset and cnt:
-            cs = Comment.query.filter_by(author_id = uid, post_id = pid).offset(offset).limit(cnt).all()
-        else:
-            cs = Comment.query.filter_by(author_id = uid, post_id = pid).all()
+        csq = db_session.query(Comment, User)\
+            .filter(User.id == Comment.author_id)\
+            .filter(Comment.author_id == uid)
     else:
-        if offset and cnt:
-            cs = Comment.query.filter_by(post_id = pid).offset(offset).limit(cnt).all()
-        else:
-            cs = Comment.query.filter_by(post_id = pid).all()
+        csq = db_session.query(Comment, User)\
+            .filter(User.id == Comment.author_id)
+    
+    if pid:
+        csq = csq.filter(Comment.post_id == pid)
+    else:
+        csq = csq.filter(Comment.post_id.in_(pids))
+    
+    if cnt and offset:
+        csq = csq.offset(offset).limit(cnt)
+    cs = csq.all()
     
     retv = []
     results_per_page = int(rpp) if rpp else None
-    for i, c in enumerate(cs):
+    for i, cu in enumerate(cs):
+        c, u = cu
         crepr = c.to_dict()
         if results_per_page:
             page = int(i / results_per_page)
             crepr.update({'page': page})
-        crepr.update({'username': User.query.filter_by(id = c.author_id).first().username})
+        crepr.update({'username': u.username})
         retv += [crepr]
     return api_200({'Comments': retv})
 

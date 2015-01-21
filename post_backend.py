@@ -12,18 +12,23 @@ app.config.update(dict(\
 
 @app.route('/posts', methods=['GET'])
 def get_posts():
-    resp = None
+    posts = None
     if has_url_parameter('user_id'):
         uid = get_url_parameter('user_id')
-        posts = Post.query\
-            .join(User.posts)\
-            .filter(User.id == uid)\
+        posts = db_session.query(Post, User)\
+            .filter(User.id == Post.author_id)\
+            .filter(Post.author_id == uid)\
             .all()
-        resp = [p.to_dict_short() for p in posts]
     else:
-        resp = [p.to_dict_short() for p in Post.query.all()]
-    for r in resp:
-        r.update({'username': User.query.filter_by(id = r['author_id']).first().username})
+        posts = db_session.query(Post, User)\
+            .filter(User.id == Post.author_id)\
+            .all()
+        
+    resp = []
+    for p, u in posts:
+        r = p.to_dict_short()
+        r.update({'username': u.username})
+        resp += [r]
     return api_200({'Posts' : resp})
 
 @app.route('/posts', methods=['POST'])

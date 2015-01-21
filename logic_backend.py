@@ -202,10 +202,12 @@ def logic_complex_query():
         postsr = pyrequests.get(api_func(settings.backends['posts'], 'posts'), params = {'user_id': uid})
         posts = postsr.json()['Posts']
         comments = []
-        for p in posts:
-            comr = pyrequests.get(api_func(settings.backends['comments'], 'comments'), params = {'post_id': p['id']})
-            comments += comr.json()['Comments']
-        return api_200({'Comments': comments})
+        comr = pyrequests.get(\
+            api_func(settings.backends['comments'], 'comments'),\
+            data = pyjson.dumps({'post_ids': [p['id'] for p in posts]}),\
+            headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}\
+        )
+        return from_pyresponce(comr)
     else:
         return api_406('Required parameters: user_id')
 

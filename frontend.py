@@ -79,8 +79,7 @@ def get_me():
         sid = request.cookies.get('session_id')
         resp = pyrequests.get(api_func(settings.backends['logic'], 'logic/users'), params = {'session_id': sid})
         if resp.status_code == 200:
-            cliresp = api_200(resp.json())
-            return cliresp
+            return render_template('me.html', user=resp.json())
     return redirect(url_for('login'))
 
 @app.route('/', methods=['GET'])
@@ -297,7 +296,10 @@ def complex_query():
                 api_func(settings.backends['logic'], 'logic/complex_query'),\
                 params = {'user_id': user['id']}\
             )
-            return from_pyresponce(comr)
+            if comr.status_code == 200:
+                return render_template('complex_query.html', comments = comr.json()['Comments'])
+            else:
+                from_pyresponce(comr)
         else:
             return redirect(url_for('login'))
     else:
@@ -306,34 +308,12 @@ def complex_query():
 ### Error handlers ###
         
 def from_pyresponce(pyresp):
-   if pyresp.status_code == 200:
-       return api_200(pyresp.json())
-   elif pyresp.status_code == 406:
-       return api_406(pyresp.json()['error'])
-   elif pyresp.status_code == 404:
-       return api_404(pyresp.json()['error'])
-   elif pyresp.status_code == 403:
-       return api_403(pyresp.json()['error'])
-   elif pyresp.status_code == 401:
-       return api_401(pyresp.json()['error'])
-   else:
-       return response_builder({'errc': pyresp.status_code}, pyresp.status_code)
-        
-@app.errorhandler(404)
-def api_404(msg = 'Not found'):
-    return response_builder({'error': msg}, 404)
-
-@app.errorhandler(401)
-def api_401(msg = 'Not authorized'):
-    return response_builder({'error': msg}, 401)
-
-@app.errorhandler(403)
-def api_403(msg = 'Forbidden'):
-    return response_builder({'error': msg}, 403)
-
-@app.errorhandler(406)
-def api_406(msg = 'Unacceptable'):
-    return response_builder({'error': msg}, 406)
+    if pyresp.status_code != 200:
+        rjson = pyresp.json()
+        error = rjson['error'] if 'error' in rjson else ''
+        return render_template('error.html', code = pyresp.status_code, error = error)
+    else:
+        return api_200(pyresp.json())
 
 @app.errorhandler(200)
 def api_200(data = {}):
